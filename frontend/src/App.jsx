@@ -1,35 +1,31 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { AuthProvider, AuthContext } from './context/AuthContext';
+import { AuthPage } from './pages/AuthPage';
+import { Dashboard } from './pages/Dashboard';
+import { useContext } from 'react';
 
-function App() {
-  const [count, setCount] = useState(0)
+function AppContent() {
+  const { isAuthenticated, loading } = useContext(AuthContext);
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+  if (loading) {
+    return (
+      <div className="h-screen w-screen flex items-center justify-center bg-slate-50">
+        <div className="flex flex-col items-center gap-3">
+          <i className="fas fa-spinner fa-spin text-4xl text-indigo-600"></i>
+          <p className="text-slate-600">Loading...</p>
+        </div>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    );
+  }
+
+  return isAuthenticated ? <Dashboard /> : <AuthPage />;
 }
 
-export default App
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
+  );
+}
+
+export default App;

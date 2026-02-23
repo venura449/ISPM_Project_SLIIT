@@ -2,6 +2,9 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 
+// Import routes
+const authRoutes = require('./routes/authRoutes');
+
 const app = express();
 
 // Middleware
@@ -18,6 +21,9 @@ app.get('/', (req, res) => {
 app.get('/api/health', (req, res) => {
   res.json({ status: 'Server is running', timestamp: new Date() });
 });
+
+// Authentication routes
+app.use('/api/auth', authRoutes);
 
 // 404 handler
 app.use((req, res) => {
