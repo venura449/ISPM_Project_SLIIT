@@ -382,12 +382,19 @@ export default function EmployeeReport() {
                               color: "#fff",
                               padding: "8px 12px",
                             }}
-                            labelStyle={{ color: "#94a3b8", fontSize: 11, marginBottom: 2 }}
+                            labelStyle={{
+                              color: "#94a3b8",
+                              fontSize: 11,
+                              marginBottom: 2,
+                            }}
                             itemStyle={{ color: "#fff", fontSize: 12 }}
                             formatter={(v, n) => [`${v} days`, n]}
                           />
                           <Legend
-                            wrapperStyle={{ background: "transparent", paddingTop: 8 }}
+                            wrapperStyle={{
+                              background: "transparent",
+                              paddingTop: 8,
+                            }}
                             iconType="circle"
                             iconSize={8}
                             formatter={(v) => (
