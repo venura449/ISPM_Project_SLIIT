@@ -92,9 +92,13 @@ const EmployeeProfile = ({ employee, onUpdate, onClose }) => {
       : "—";
 
   const generatePDF = () => {
-    const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+    });
     const primary = [37, 99, 235]; // blue-600
-    const dark = [31, 41, 55];     // gray-800
+    const dark = [31, 41, 55]; // gray-800
     const muted = [107, 114, 128]; // gray-500
     const W = doc.internal.pageSize.getWidth();
 
@@ -108,7 +112,9 @@ const EmployeeProfile = ({ employee, onUpdate, onClose }) => {
     doc.setFont("helvetica", "normal");
     doc.setFontSize(9);
     doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 22);
-    doc.text(`Employee ID: ${employee.employee_id || "—"}`, W - 14, 22, { align: "right" });
+    doc.text(`Employee ID: ${employee.employee_id || "—"}`, W - 14, 22, {
+      align: "right",
+    });
 
     // ── Avatar circle + name block ──────────────────────────────────────────
     const initials = (employee.name || "?").charAt(0).toUpperCase();
@@ -160,15 +166,23 @@ const EmployeeProfile = ({ employee, onUpdate, onClose }) => {
       startY: y,
       margin: { left: 14, right: 14 },
       theme: "plain",
-      styles: { fontSize: 9, cellPadding: { top: 2.5, bottom: 2.5, left: 3, right: 3 } },
-      columnStyles: { 0: { fontStyle: "bold", textColor: muted, cellWidth: 45 }, 1: { textColor: dark } },
+      styles: {
+        fontSize: 9,
+        cellPadding: { top: 2.5, bottom: 2.5, left: 3, right: 3 },
+      },
+      columnStyles: {
+        0: { fontStyle: "bold", textColor: muted, cellWidth: 45 },
+        1: { textColor: dark },
+      },
       body: [
         ["Full Name", employee.name || "—"],
         ["Email Address", employee.email || "—"],
         ["Phone", employee.phone || "—"],
         ["Home Address", employee.address || "—"],
       ],
-      didDrawPage: (d) => { y = d.cursor.y + 4; },
+      didDrawPage: (d) => {
+        y = d.cursor.y + 4;
+      },
     });
     y = doc.lastAutoTable.finalY + 6;
 
@@ -178,8 +192,14 @@ const EmployeeProfile = ({ employee, onUpdate, onClose }) => {
       startY: y,
       margin: { left: 14, right: 14 },
       theme: "plain",
-      styles: { fontSize: 9, cellPadding: { top: 2.5, bottom: 2.5, left: 3, right: 3 } },
-      columnStyles: { 0: { fontStyle: "bold", textColor: muted, cellWidth: 45 }, 1: { textColor: dark } },
+      styles: {
+        fontSize: 9,
+        cellPadding: { top: 2.5, bottom: 2.5, left: 3, right: 3 },
+      },
+      columnStyles: {
+        0: { fontStyle: "bold", textColor: muted, cellWidth: 45 },
+        1: { textColor: dark },
+      },
       body: [
         ["Department", employee.department || "—"],
         ["Position", employee.position || "—"],
@@ -187,18 +207,24 @@ const EmployeeProfile = ({ employee, onUpdate, onClose }) => {
         ["Employment Status", employee.status || "—"],
         ["Joining Date", fmt(employee.joining_date)],
         ["Days Employed", `${daysEmployed} days`],
-        ["Monthly Salary", employee.salary ? `Rs. ${parseFloat(employee.salary).toLocaleString("en-IN")}` : "—"],
+        [
+          "Monthly Salary",
+          employee.salary
+            ? `Rs. ${parseFloat(employee.salary).toLocaleString("en-IN")}`
+            : "—",
+        ],
       ],
     });
     y = doc.lastAutoTable.finalY + 6;
 
     // ── Lifecycle & Timeline ────────────────────────────────────────────────
     section("Lifecycle & Timeline");
-    const lifeCycleRows = [
-      ["Joined", fmt(employee.joining_date)],
-    ];
+    const lifeCycleRows = [["Joined", fmt(employee.joining_date)]];
     if (employee.probation_end_date)
-      lifeCycleRows.push(["Probation End Date", fmt(employee.probation_end_date)]);
+      lifeCycleRows.push([
+        "Probation End Date",
+        fmt(employee.probation_end_date),
+      ]);
     if (employee.resignation_date)
       lifeCycleRows.push(["Resignation Date", fmt(employee.resignation_date)]);
     if (employee.manager_name)
@@ -207,8 +233,14 @@ const EmployeeProfile = ({ employee, onUpdate, onClose }) => {
       startY: y,
       margin: { left: 14, right: 14 },
       theme: "plain",
-      styles: { fontSize: 9, cellPadding: { top: 2.5, bottom: 2.5, left: 3, right: 3 } },
-      columnStyles: { 0: { fontStyle: "bold", textColor: muted, cellWidth: 45 }, 1: { textColor: dark } },
+      styles: {
+        fontSize: 9,
+        cellPadding: { top: 2.5, bottom: 2.5, left: 3, right: 3 },
+      },
+      columnStyles: {
+        0: { fontStyle: "bold", textColor: muted, cellWidth: 45 },
+        1: { textColor: dark },
+      },
       body: lifeCycleRows,
     });
     y = doc.lastAutoTable.finalY + 6;
@@ -220,7 +252,11 @@ const EmployeeProfile = ({ employee, onUpdate, onClose }) => {
         startY: y,
         margin: { left: 14, right: 14 },
         theme: "plain",
-        styles: { fontSize: 9, cellPadding: { top: 2.5, bottom: 2.5, left: 3, right: 3 }, textColor: dark },
+        styles: {
+          fontSize: 9,
+          cellPadding: { top: 2.5, bottom: 2.5, left: 3, right: 3 },
+          textColor: dark,
+        },
         body: [[employee.notes]],
       });
       y = doc.lastAutoTable.finalY + 6;
@@ -274,8 +310,18 @@ const EmployeeProfile = ({ employee, onUpdate, onClose }) => {
             title="Download Employee Report"
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl bg-blue-600 hover:bg-blue-700 text-white transition-colors shadow-sm"
           >
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
+            <svg
+              className="w-3.5 h-3.5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"
+              />
             </svg>
             Download Report
           </button>
