@@ -1112,7 +1112,7 @@ export default function PayrollManagement() {
             },
             {
               label: "Status",
-              value: `${summary.draft_count}D / ${summary.processed_count}P / ${summary.paid_count}✓`,
+              value: `${summary.draft_count ?? 0}D / ${summary.processed_count ?? 0}P / ${summary.paid_count ?? 0}✓`,
               color: "text-gray-700",
               bg: "bg-gray-50",
               border: "border-gray-200",

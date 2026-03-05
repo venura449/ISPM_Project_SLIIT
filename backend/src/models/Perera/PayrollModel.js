@@ -124,9 +124,9 @@ class PayrollModel {
          COALESCE(SUM(epf_employee), 0)      AS total_epf_employee,
          COALESCE(SUM(epf_employer), 0)      AS total_epf_employer,
          COALESCE(SUM(etf), 0)               AS total_etf,
-         SUM(CASE WHEN status = 'Draft'     THEN 1 ELSE 0 END) AS draft_count,
-         SUM(CASE WHEN status = 'Processed' THEN 1 ELSE 0 END) AS processed_count,
-         SUM(CASE WHEN status = 'Paid'      THEN 1 ELSE 0 END) AS paid_count
+         COALESCE(SUM(CASE WHEN status = 'Draft'     THEN 1 ELSE 0 END), 0) AS draft_count,
+         COALESCE(SUM(CASE WHEN status = 'Processed' THEN 1 ELSE 0 END), 0) AS processed_count,
+         COALESCE(SUM(CASE WHEN status = 'Paid'      THEN 1 ELSE 0 END), 0) AS paid_count
        FROM payroll_records
        WHERE pay_period_month = ? AND pay_period_year = ?`,
             [month, year]
@@ -244,7 +244,7 @@ class PayrollModel {
              SUM(CASE WHEN status = 'Present'  THEN 1   ELSE 0 END) AS present_days,
              SUM(CASE WHEN status = 'Half Day' THEN 0.5 ELSE 0 END) AS half_days
            FROM attendance
-           WHERE employee_id = ? AND MONTH(date) = ? AND YEAR(date) = ?`,
+           WHERE employee_id = ? AND MONTH(attendance_date) = ? AND YEAR(attendance_date) = ?`,
                     [emp.emp_id, month, year]
                 );
 
