@@ -1,4 +1,4 @@
-# ITPM Project - HR System
+# ISPM Project - HR System
 
 A modern HR management system with authentication, built with Express.js backend and React frontend.
 
