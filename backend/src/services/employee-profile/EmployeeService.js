@@ -1,6 +1,6 @@
-const Employee = require('../../models/Samarawikrama/Employee');
-const EmployeeDocument = require('../../models/Samarawikrama/EmployeeDocument');
-const EmployeeRole = require('../../models/Samarawikrama/EmployeeRole');
+const Employee = require('../../models/employee-profile/Employee');
+const EmployeeDocument = require('../../models/employee-profile/EmployeeDocument');
+const EmployeeRole = require('../../models/employee-profile/EmployeeRole');
 
 class EmployeeService {
   /**

@@ -1,5 +1,5 @@
-const LeaveRequest = require('../../models/Dias/LeaveRequest');
-const LeaveBalance = require('../../models/Dias/LeaveBalance');
+const LeaveRequest = require('../../models/workforce/LeaveRequest');
+const LeaveBalance = require('../../models/workforce/LeaveBalance');
 
 class LeaveRequestController {
     /**

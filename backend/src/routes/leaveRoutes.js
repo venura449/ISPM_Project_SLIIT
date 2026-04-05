@@ -1,5 +1,5 @@
 const express = require('express');
-const LeaveRequestController = require('../controllers/Dias/LeaveRequestController');
+const LeaveRequestController = require('../controllers/workforce/LeaveRequestController');
 const { authMiddleware } = require('../middlewares/authMiddleware');
 
 const router = express.Router();

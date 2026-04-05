@@ -1,5 +1,5 @@
 const express = require('express');
-const AttendanceController = require('../controllers/Dias/AttendanceController');
+const AttendanceController = require('../controllers/workforce/AttendanceController');
 const { authMiddleware } = require('../middlewares/authMiddleware');
 
 const router = express.Router();

@@ -1,7 +1,7 @@
-const TrainingProgram = require('../../models/Dias/TrainingProgram');
-const TrainingSession = require('../../models/Dias/TrainingSession');
-const TrainingAssignment = require('../../models/Dias/TrainingAssignment');
-const TrainingAttendance = require('../../models/Dias/TrainingAttendance');
+const TrainingProgram = require('../../models/workforce/TrainingProgram');
+const TrainingSession = require('../../models/workforce/TrainingSession');
+const TrainingAssignment = require('../../models/workforce/TrainingAssignment');
+const TrainingAttendance = require('../../models/workforce/TrainingAttendance');
 
 class TrainingService {
   /**

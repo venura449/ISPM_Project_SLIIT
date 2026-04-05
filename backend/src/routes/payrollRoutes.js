@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const PayrollController = require('../controllers/Perera/PayrollController');
+const PayrollController = require('../controllers/payroll/PayrollController');
 const { authMiddleware } = require('../middlewares/authMiddleware');
 
 // All routes require authentication

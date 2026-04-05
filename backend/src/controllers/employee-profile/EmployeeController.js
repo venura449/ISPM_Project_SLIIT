@@ -1,6 +1,6 @@
-const EmployeeService = require('../../services/Bandara/EmployeeService');
-const Employee = require('../../models/Bandara/Employee');
-const EmployeeDocument = require('../../models/Bandara/EmployeeDocument');
+const EmployeeService = require('../../services/employee-profile/EmployeeService');
+const Employee = require('../../models/employee-profile/Employee');
+const EmployeeDocument = require('../../models/employee-profile/EmployeeDocument');
 
 class EmployeeController {
   /**
@@ -308,20 +308,6 @@ class EmployeeController {
         success: false,
         message: err.message || 'Failed to retrieve employees'
       });
-    }
-  }
-
-  /**
-   * Get next available employee ID
-   * GET /api/employees/next-id
-   */
-  static async getNextEmployeeId(req, res) {
-    try {
-      const result = await Employee.getNextEmployeeId();
-      return res.status(200).json({ success: true, data: { next_id: result } });
-    } catch (err) {
-      console.error('Get next employee ID error:', err);
-      return res.status(500).json({ success: false, message: err.message || 'Failed to generate employee ID' });
     }
   }
 

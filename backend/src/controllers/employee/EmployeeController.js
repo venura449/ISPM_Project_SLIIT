@@ -1,6 +1,6 @@
-const EmployeeService = require('../../services/Samarawikrama/EmployeeService');
-const Employee = require('../../models/Samarawikrama/Employee');
-const EmployeeDocument = require('../../models/Samarawikrama/EmployeeDocument');
+const EmployeeService = require('../../services/employee/EmployeeService');
+const Employee = require('../../models/employee/Employee');
+const EmployeeDocument = require('../../models/employee/EmployeeDocument');
 
 class EmployeeController {
   /**
@@ -308,6 +308,20 @@ class EmployeeController {
         success: false,
         message: err.message || 'Failed to retrieve employees'
       });
+    }
+  }
+
+  /**
+   * Get next available employee ID
+   * GET /api/employees/next-id
+   */
+  static async getNextEmployeeId(req, res) {
+    try {
+      const result = await Employee.getNextEmployeeId();
+      return res.status(200).json({ success: true, data: { next_id: result } });
+    } catch (err) {
+      console.error('Get next employee ID error:', err);
+      return res.status(500).json({ success: false, message: err.message || 'Failed to generate employee ID' });
     }
   }
 

@@ -1,6 +1,6 @@
-const Attendance = require('../../models/Dias/Attendance');
-const Employee = require('../../models/Bandara/Employee');
-const LeaveRequest = require('../../models/Dias/LeaveRequest');
+const Attendance = require('../../models/workforce/Attendance');
+const Employee = require('../../models/employee/Employee');
+const LeaveRequest = require('../../models/workforce/LeaveRequest');
 
 class AttendanceController {
   /**

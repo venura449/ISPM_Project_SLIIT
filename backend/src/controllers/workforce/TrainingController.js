@@ -1,6 +1,6 @@
-const TrainingService = require('../../services/Dias/TrainingService');
-const TrainingAssignment = require('../../models/Dias/TrainingAssignment');
-const TrainingAttendance = require('../../models/Dias/TrainingAttendance');
+const TrainingService = require('../../services/workforce/TrainingService');
+const TrainingAssignment = require('../../models/workforce/TrainingAssignment');
+const TrainingAttendance = require('../../models/workforce/TrainingAttendance');
 
 class TrainingController {
   /**

@@ -1,4 +1,4 @@
-const PayrollModel = require('../../models/Perera/PayrollModel');
+const PayrollModel = require('../../models/payroll/PayrollModel');
 
 class PayrollController {
   // GET /api/payroll?month=&year=&status=
@@ -6,7 +6,7 @@ class PayrollController {
     try {
       const { month, year, status } = req.query;
       const m = parseInt(month) || new Date().getMonth() + 1;
-      const y = parseInt(year)  || new Date().getFullYear();
+      const y = parseInt(year) || new Date().getFullYear();
       const [records, summary] = await Promise.all([
         PayrollModel.getPayrollList(m, y, status || null),
         PayrollModel.getPayrollSummary(m, y)

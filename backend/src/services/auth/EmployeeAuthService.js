@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const Employee = require('../../models/Bandara/Employee');
+const Employee = require('../../models/employee/Employee');
 require('dotenv').config();
 
 class EmployeeAuthService {
