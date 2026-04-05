@@ -1,10 +1,13 @@
-﻿# ISPM Project - HR System
+# ISPM Project - HR System
+
+# ISPM Project - HR System
 
 A modern HR management system with authentication, built with Express.js backend and React frontend.
 
 ## Project Overview
 
 This project implements a complete authentication system with:
+
 - **Backend**: Node.js + Express + MySQL (Docker)
 - **Frontend**: React + Vite + Tailwind CSS
 - **Authentication**: JWT-based with bcrypt password hashing
@@ -13,6 +16,7 @@ This project implements a complete authentication system with:
 ## Quick Start
 
 ### Prerequisites
+
 - Docker & Docker Compose
 - Node.js 18+ (for local development)
 - MySQL 8.0 (if running without Docker)
@@ -56,6 +60,7 @@ Frontend runs on: **http://localhost:5173**
 ## Architecture
 
 ### Backend Structure
+
 ```
 backend/
 ├── src/
@@ -80,6 +85,7 @@ backend/
 ```
 
 ### Frontend Structure
+
 ```
 frontend/
 ├── src/
@@ -103,6 +109,7 @@ frontend/
 ## Authentication Flow
 
 ### Registration
+
 1. User fills name, email, password, confirm password
 2. Frontend validates inputs
 3. POST to `/api/auth/register`
@@ -113,6 +120,7 @@ frontend/
 8. User redirected to dashboard
 
 ### Login
+
 1. User enters email and password
 2. Frontend validates inputs
 3. POST to `/api/auth/login`
@@ -122,6 +130,7 @@ frontend/
 7. User redirected to dashboard
 
 ### Protected Routes
+
 1. Dashboard checks if token exists
 2. On app load, token is verified via `/api/auth/verify`
 3. If valid, user data restored from token
@@ -130,6 +139,7 @@ frontend/
 ## API Endpoints
 
 ### Public Endpoints
+
 ```
 POST   /api/auth/register              # Create account
 POST   /api/auth/login                 # Sign in
@@ -137,6 +147,7 @@ POST   /api/auth/verify                # Verify token
 ```
 
 ### Protected Endpoints (require JWT token)
+
 ```
 GET    /api/auth/profile               # Get user profile
 PUT    /api/auth/profile               # Update profile
@@ -149,6 +160,7 @@ See [backend/src/routes/AUTH_API.md](backend/src/routes/AUTH_API.md) for detaile
 ## Database Schema
 
 ### Users Table
+
 ```sql
 CREATE TABLE users (
   id INT AUTO_INCREMENT PRIMARY KEY,
@@ -166,6 +178,7 @@ CREATE TABLE users (
 ## Environment Variables
 
 ### Backend (.env)
+
 ```
 # Database
 DB_HOST=db                    # 'db' for Docker, 'localhost' for local
@@ -184,6 +197,7 @@ JWT_EXPIRY=7d
 ```
 
 ### Frontend (.env)
+
 ```
 VITE_API_URL=http://localhost:5000/api
 ```
@@ -191,24 +205,28 @@ VITE_API_URL=http://localhost:5000/api
 ## Security Features
 
 ### Password Security
+
 - Hashed with bcryptjs (10 salt rounds)
 - Never stored in plain text
 - Minimum 6 characters required
 - Change password validation
 
 ### Token Security
+
 - JWT with HS256 algorithm
 - 7-day expiration (configurable)
 - Token verification middleware
 - Secure localStorage storage
 
 ### Database Security
+
 - Connection pooling
 - Prepared statements (prevents SQL injection)
 - Unique email constraint
 - Indexed email column
 
 ### Data Validation
+
 - Email format validation
 - Required field checks
 - Password confirmation matching
@@ -225,12 +243,14 @@ docker compose up
 ```
 
 Services:
+
 - Backend API: http://localhost:5000
 - MySQL Database: localhost:3306
 
 ### Running Locally
 
 **Backend:**
+
 ```bash
 cd backend
 npm install
@@ -239,6 +259,7 @@ npm run dev
 ```
 
 **Frontend:**
+
 ```bash
 cd frontend
 npm install
@@ -248,6 +269,7 @@ npm run dev
 ## Testing the API
 
 ### Register
+
 ```bash
 curl -X POST http://localhost:5000/api/auth/register \
   -H "Content-Type: application/json" \
@@ -259,6 +281,7 @@ curl -X POST http://localhost:5000/api/auth/register \
 ```
 
 ### Login
+
 ```bash
 curl -X POST http://localhost:5000/api/auth/login \
   -H "Content-Type: application/json" \
@@ -269,6 +292,7 @@ curl -X POST http://localhost:5000/api/auth/login \
 ```
 
 ### Get Profile (Protected)
+
 ```bash
 curl -X GET http://localhost:5000/api/auth/profile \
   -H "Authorization: Bearer YOUR_TOKEN_HERE"
@@ -277,6 +301,7 @@ curl -X GET http://localhost:5000/api/auth/profile \
 ## Technologies Used
 
 ### Backend
+
 - **Express.js** - Web framework
 - **MySQL2** - Database driver
 - **bcryptjs** - Password hashing
@@ -286,6 +311,7 @@ curl -X GET http://localhost:5000/api/auth/profile \
 - **Nodemon** - Development auto-reload
 
 ### Frontend
+
 - **React 19** - UI library
 - **Vite** - Build tool
 - **Tailwind CSS** - Styling
@@ -293,6 +319,7 @@ curl -X GET http://localhost:5000/api/auth/profile \
 - **React Context API** - State management
 
 ### DevOps
+
 - **Docker** - Containerization
 - **Docker Compose** - Multi-container orchestration
 
