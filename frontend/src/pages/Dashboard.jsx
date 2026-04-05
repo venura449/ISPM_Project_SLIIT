@@ -239,12 +239,6 @@ const TopBar = ({ activeTab, user, onProfileEdit, onToggleSidebar }) => {
           Online
         </div>
 
-        {/* Notification bell */}
-        <button className="relative p-2 rounded-xl text-gray-500 hover:bg-blue-50 hover:text-blue-600 transition-all duration-200">
-          <Icon d={ICONS.bell} className="w-5 h-5" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-blue-600 rounded-full" />
-        </button>
-
         {/* Profile chip */}
         <button
           onClick={onProfileEdit}

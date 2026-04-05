@@ -165,7 +165,7 @@ class Employee {
         params.push(searchTerm, searchTerm, searchTerm);
       }
 
-      query += ' ORDER BY e.created_at DESC';
+      query += ' ORDER BY e.id DESC';
 
       const [rows] = await connection.query(query, params);
       return rows;

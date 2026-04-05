@@ -1,4 +1,4 @@
-USE itpm_db;
+﻿USE ISPM_db;
 
 -- Salary structures: one row per employee defining their pay components
 CREATE TABLE IF NOT EXISTS salary_structures (

@@ -1,4 +1,4 @@
-# ITPM Project - HR System
+﻿# ISPM Project - HR System
 
 A modern HR management system with authentication, built with Express.js backend and React frontend.
 
@@ -170,8 +170,8 @@ CREATE TABLE users (
 # Database
 DB_HOST=db                    # 'db' for Docker, 'localhost' for local
 DB_USER=root
-DB_PASSWORD=itpm_secure_password_2024
-DB_NAME=itpm_db
+DB_PASSWORD=ISPM_secure_password_2024
+DB_NAME=ISPM_db
 DB_PORT=3306
 
 # Server

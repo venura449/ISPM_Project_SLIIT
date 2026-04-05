@@ -1,5 +1,5 @@
-{
-  "name": "itpm-backend",
+﻿{
+  "name": "ISPM-backend",
   "version": "1.0.0",
   "description": "Express backend with MySQL database",
   "main": "src/server.js",

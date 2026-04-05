@@ -3,6 +3,8 @@ import { toast } from "react-toastify";
 
 const ProfileEditModal = ({ user, onClose, onUpdate }) => {
   const [loading, setLoading] = useState(false);
+  const [nameError, setNameError] = useState("");
+  const [phoneError, setPhoneError] = useState("");
   const [formData, setFormData] = useState({
     name: user?.name || "",
     email: user?.email || "",
@@ -12,6 +14,28 @@ const ProfileEditModal = ({ user, onClose, onUpdate }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    if (name === "name") {
+      // Allow letters and spaces only
+      const lettersOnly = value.replace(/[^a-zA-Z\s]/g, "");
+      setFormData((prev) => ({ ...prev, name: lettersOnly }));
+      if (lettersOnly.trim().length > 0 && !/^[a-zA-Z\s]+$/.test(lettersOnly)) {
+        setNameError("Name can only contain letters");
+      } else {
+        setNameError("");
+      }
+      return;
+    }
+    if (name === "phone") {
+      // Allow digits only
+      const digitsOnly = value.replace(/\D/g, "");
+      setFormData((prev) => ({ ...prev, phone: digitsOnly }));
+      if (digitsOnly.length > 0 && digitsOnly.length !== 10) {
+        setPhoneError("Phone number must be exactly 10 digits");
+      } else {
+        setPhoneError("");
+      }
+      return;
+    }
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -27,8 +51,26 @@ const ProfileEditModal = ({ user, onClose, onUpdate }) => {
       return;
     }
 
+    if (!/^[a-zA-Z\s]+$/.test(formData.name.trim())) {
+      setNameError("Name can only contain letters");
+      toast.error("Name cannot contain numbers or symbols", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+      return;
+    }
+
     if (!formData.email.trim()) {
       toast.error("Email is required", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+      return;
+    }
+
+    if (formData.phone && formData.phone.length !== 10) {
+      setPhoneError("Phone number must be exactly 10 digits");
+      toast.error("Phone number must be exactly 10 digits", {
         position: "top-right",
         autoClose: 3000,
       });
@@ -163,6 +205,9 @@ const ProfileEditModal = ({ user, onClose, onUpdate }) => {
                 className="w-full py-3 text-sm text-gray-700 bg-transparent outline-none placeholder-gray-400 disabled:opacity-50"
               />
             </div>
+            {nameError && (
+              <p className="text-xs text-red-500 mt-1 ml-1">{nameError}</p>
+            )}
           </div>
 
           {/* Email (read-only) */}
@@ -225,10 +270,14 @@ const ProfileEditModal = ({ user, onClose, onUpdate }) => {
                   value={formData.phone}
                   onChange={handleChange}
                   disabled={loading}
-                  placeholder="+94 71 234 5678"
+                  placeholder="0771234567"
+                  maxLength={10}
                   className="w-full py-3 text-sm text-gray-700 bg-transparent outline-none placeholder-gray-400 disabled:opacity-50"
                 />
               </div>
+              {phoneError && (
+                <p className="text-xs text-red-500 mt-1 ml-1">{phoneError}</p>
+              )}
             </div>
 
             <div>

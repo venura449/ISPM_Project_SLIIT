@@ -1,5 +1,5 @@
--- Seed sample data for testing
-USE itpm_db;
+﻿-- Seed sample data for testing
+USE ISPM_db;
 
 -- Insert sample users
 INSERT INTO users (name, email, password, phone, address, created_at) VALUES

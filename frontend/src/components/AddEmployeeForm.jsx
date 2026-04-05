@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const labelCls = "block text-xs font-medium text-gray-500 mb-1";
 
-const STEPS = ["Basic Info", "Employment", "Dates & Pay", "Extra Info"];
+const STEPS = ["Basic Info", "Employment", "Dates & Pay"];
 
 const ValidationIcon = ({ valid }) =>
   valid ? (
@@ -40,17 +42,23 @@ const BASE_SELECT =
 
 const validators = {
   employee_id: (v) => v.trim().length > 0,
-  name: (v) => /^[a-zA-Z\s.'-]{2,}$/.test(v.trim()),
-  email: (v) => /^[^\s@]+@gmail\.com$/.test(v.trim()),
-  phone: (v) => v.trim() === "" || /^[+]?[\d\s\-(). ]{7,15}$/.test(v.trim()),
+  name: (v) => /^[a-zA-Z\s]{2,}$/.test(v.trim()),
+  email: (v) =>
+    /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/.test(v.trim()) &&
+    !/\.com.+/.test(v.trim()),
+  phone: (v) => v.trim() === "" || /^\d{10}$/.test(v.trim()),
   address: () => true,
   department: (v) => !!v,
   position: (v) => !!v,
   designation: (v) => v.trim() === "" || /^[a-zA-Z0-9\s.'-]+$/.test(v.trim()),
   status: () => true,
-  joining_date: (v) => !!v,
-  probation_end_date: () => true,
-  salary: (v) => v === "" || Number(v) > 0,
+  joining_date: (v) => !!v && !isNaN(new Date(v).getTime()),
+  probation_end_date: (v, joiningDate) =>
+    !v ||
+    (!isNaN(new Date(v).getTime()) &&
+      (!joiningDate || new Date(v) > new Date(joiningDate))),
+  salary: (v) =>
+    v.trim() !== "" && /^\d+(\.\d+)?$/.test(v) && parseFloat(v) > 0,
   manager_id: () => true,
   notes: () => true,
 };
@@ -59,7 +67,6 @@ const STEP_FIELDS = {
   1: ["employee_id", "name", "email", "phone", "address"],
   2: ["department", "position", "designation", "status"],
   3: ["joining_date", "probation_end_date", "salary"],
-  4: ["manager_id", "notes"],
 };
 
 const AddEmployeeForm = ({ onSubmit, onCancel }) => {
@@ -172,6 +179,34 @@ const AddEmployeeForm = ({ onSubmit, onCancel }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    if (name === "name") {
+      const lettersOnly = value.replace(/[^a-zA-Z\s]/g, "");
+      setFormData((prev) => ({ ...prev, name: lettersOnly }));
+      setTouched((p) => ({ ...p, name: true }));
+      return;
+    }
+    if (name === "phone") {
+      const digitsOnly = value.replace(/\D/g, "");
+      setFormData((prev) => ({ ...prev, phone: digitsOnly }));
+      setTouched((p) => ({ ...p, phone: true }));
+      return;
+    }
+    if (name === "email") {
+      setFormData((prev) => ({ ...prev, email: value }));
+      setTouched((p) => ({ ...p, email: true }));
+      return;
+    }
+    if (name === "salary") {
+      // Allow digits and at most one decimal point, no negatives/letters/symbols
+      const sanitized = value.replace(/[^\d.]/g, "");
+      // Prevent multiple decimal points
+      const parts = sanitized.split(".");
+      const clean =
+        parts.length > 2 ? parts[0] + "." + parts.slice(1).join("") : sanitized;
+      setFormData((prev) => ({ ...prev, salary: clean }));
+      setTouched((p) => ({ ...p, salary: true }));
+      return;
+    }
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -189,12 +224,23 @@ const AddEmployeeForm = ({ onSubmit, onCancel }) => {
           toast.warning("Employee name is required");
           return false;
         }
+        if (!/^[a-zA-Z\s]{2,}$/.test(formData.name.trim())) {
+          toast.warning("Name cannot contain numbers or symbols");
+          return false;
+        }
         if (!formData.email.trim()) {
           toast.warning("Email address is required");
           return false;
         }
-        if (!/^[^\s@]+@gmail\.com$/.test(formData.email)) {
-          toast.warning("Email must be a valid @gmail.com address");
+        if (
+          !/^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/.test(formData.email) ||
+          /\.com.+/.test(formData.email)
+        ) {
+          toast.warning("Enter a valid email address");
+          return false;
+        }
+        if (formData.phone && !/^\d{10}$/.test(formData.phone)) {
+          toast.warning("Phone number must be exactly 10 digits");
           return false;
         }
         return true;
@@ -215,9 +261,24 @@ const AddEmployeeForm = ({ onSubmit, onCancel }) => {
           toast.warning("Joining date is required");
           return false;
         }
-        return true;
-
-      case 4:
+        if (isNaN(new Date(formData.joining_date).getTime())) {
+          toast.warning("Please enter a valid joining date");
+          return false;
+        }
+        if (
+          formData.probation_end_date &&
+          !validators.probation_end_date(
+            formData.probation_end_date,
+            formData.joining_date,
+          )
+        ) {
+          toast.warning("Probation end date must be after the joining date");
+          return false;
+        }
+        if (!formData.salary || !validators.salary(formData.salary)) {
+          toast.warning("Salary is required and must be a positive number");
+          return false;
+        }
         return true;
 
       default:
@@ -231,11 +292,39 @@ const AddEmployeeForm = ({ onSubmit, onCancel }) => {
   };
   const handlePrev = () => setCurrentStep((p) => p - 1);
 
+  const isStepValid = (step) => {
+    switch (step) {
+      case 1:
+        return (
+          validators.employee_id(formData.employee_id) &&
+          validators.name(formData.name) &&
+          validators.email(formData.email) &&
+          validators.phone(formData.phone)
+        );
+      case 2:
+        return (
+          validators.department(formData.department) &&
+          validators.position(formData.position)
+        );
+      case 3:
+        return (
+          validators.joining_date(formData.joining_date) &&
+          validators.probation_end_date(
+            formData.probation_end_date,
+            formData.joining_date,
+          ) &&
+          validators.salary(formData.salary)
+        );
+      default:
+        return true;
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     touchStep(currentStep);
 
-    if (!validateStep(4)) {
+    if (!validateStep(3)) {
       return;
     }
 
@@ -362,6 +451,11 @@ const AddEmployeeForm = ({ onSubmit, onCancel }) => {
                     </span>
                   )}
                 </div>
+                {touched.name && !isValid("name") && (
+                  <p className="text-xs text-red-500 mt-1">
+                    Name can only contain letters and spaces
+                  </p>
+                )}
               </div>
               {/* Email */}
               <div>
@@ -375,7 +469,7 @@ const AddEmployeeForm = ({ onSubmit, onCancel }) => {
                     value={formData.email}
                     onChange={handleChange}
                     onBlur={handleBlur}
-                    placeholder="john@gmail.com"
+                    placeholder="john@example.com"
                     disabled={loading}
                     className={`${fieldCls("email")} pr-8`}
                   />
@@ -385,6 +479,11 @@ const AddEmployeeForm = ({ onSubmit, onCancel }) => {
                     </span>
                   )}
                 </div>
+                {touched.email && !isValid("email") && (
+                  <p className="text-xs text-red-500 mt-1">
+                    Enter a valid email (e.g. john@example.com)
+                  </p>
+                )}
               </div>
               {/* Phone */}
               <div>
@@ -396,7 +495,8 @@ const AddEmployeeForm = ({ onSubmit, onCancel }) => {
                     value={formData.phone}
                     onChange={handleChange}
                     onBlur={handleBlur}
-                    placeholder="+94 71 234 5678"
+                    placeholder="0771234567"
+                    maxLength={10}
                     disabled={loading}
                     className={`${fieldCls("phone")} pr-8`}
                   />
@@ -406,6 +506,11 @@ const AddEmployeeForm = ({ onSubmit, onCancel }) => {
                     </span>
                   )}
                 </div>
+                {touched.phone && !isValid("phone") && (
+                  <p className="text-xs text-red-500 mt-1">
+                    Phone must be exactly 10 digits
+                  </p>
+                )}
               </div>
               {/* Address */}
               <div className="col-span-2">
@@ -555,51 +660,133 @@ const AddEmployeeForm = ({ onSubmit, onCancel }) => {
                 <label className={labelCls}>
                   Joining Date <span className="text-red-400">*</span>
                 </label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="date"
-                    name="joining_date"
-                    value={formData.joining_date}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
+                <div className="relative">
+                  <DatePicker
+                    selected={
+                      formData.joining_date
+                        ? new Date(formData.joining_date)
+                        : null
+                    }
+                    onChange={(date) => {
+                      setFormData((p) => ({
+                        ...p,
+                        joining_date: date
+                          ? date.toISOString().split("T")[0]
+                          : "",
+                        // clear probation if it's no longer valid
+                        probation_end_date:
+                          p.probation_end_date &&
+                          date &&
+                          new Date(p.probation_end_date) <= date
+                            ? ""
+                            : p.probation_end_date,
+                      }));
+                      setTouched((p) => ({ ...p, joining_date: true }));
+                    }}
+                    onBlur={() =>
+                      setTouched((p) => ({ ...p, joining_date: true }))
+                    }
                     disabled={loading}
-                    className={`${fieldCls("joining_date")} flex-1`}
+                    maxDate={new Date()}
+                    dateFormat="dd/MM/yyyy"
+                    placeholderText="DD/MM/YYYY"
+                    showMonthDropdown
+                    showYearDropdown
+                    dropdownMode="select"
+                    className={`${fieldCls("joining_date")} pr-8 w-full`}
+                    wrapperClassName="w-full"
+                    autoComplete="off"
                   />
                   {touched.joining_date && (
-                    <ValidationIcon valid={isValid("joining_date")} />
+                    <span className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none">
+                      <ValidationIcon valid={isValid("joining_date")} />
+                    </span>
                   )}
                 </div>
+                {touched.joining_date && !isValid("joining_date") && (
+                  <p className="text-xs text-red-500 mt-1">
+                    Joining date is required
+                  </p>
+                )}
               </div>
               {/* Probation End Date */}
               <div>
                 <label className={labelCls}>Probation End Date</label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="date"
-                    name="probation_end_date"
-                    value={formData.probation_end_date}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
+                <div className="relative">
+                  <DatePicker
+                    selected={
+                      formData.probation_end_date
+                        ? new Date(formData.probation_end_date)
+                        : null
+                    }
+                    onChange={(date) => {
+                      setFormData((p) => ({
+                        ...p,
+                        probation_end_date: date
+                          ? date.toISOString().split("T")[0]
+                          : "",
+                      }));
+                      setTouched((p) => ({ ...p, probation_end_date: true }));
+                    }}
+                    onBlur={() =>
+                      setTouched((p) => ({
+                        ...p,
+                        probation_end_date: true,
+                      }))
+                    }
                     disabled={loading}
-                    className={`${fieldCls("probation_end_date")} flex-1`}
+                    minDate={
+                      formData.joining_date
+                        ? new Date(
+                            new Date(formData.joining_date).getTime() +
+                              86400000,
+                          )
+                        : undefined
+                    }
+                    dateFormat="dd/MM/yyyy"
+                    placeholderText="DD/MM/YYYY"
+                    showMonthDropdown
+                    showYearDropdown
+                    dropdownMode="select"
+                    isClearable
+                    className={`${fieldCls("probation_end_date")} pr-8 w-full`}
+                    wrapperClassName="w-full"
+                    autoComplete="off"
                   />
                   {touched.probation_end_date && (
-                    <ValidationIcon valid={isValid("probation_end_date")} />
+                    <span className="absolute right-8 top-1/2 -translate-y-1/2 pointer-events-none">
+                      <ValidationIcon
+                        valid={validators.probation_end_date(
+                          formData.probation_end_date,
+                          formData.joining_date,
+                        )}
+                      />
+                    </span>
                   )}
                 </div>
+                {touched.probation_end_date &&
+                  !validators.probation_end_date(
+                    formData.probation_end_date,
+                    formData.joining_date,
+                  ) && (
+                    <p className="text-xs text-red-500 mt-1">
+                      Probation end date must be after the joining date
+                    </p>
+                  )}
               </div>
               {/* Salary */}
               <div className="col-span-2">
-                <label className={labelCls}>Monthly Salary</label>
+                <label className={labelCls}>
+                  Monthly Salary <span className="text-red-400">*</span>
+                </label>
                 <div className="relative">
                   <input
-                    type="number"
+                    type="text"
                     name="salary"
                     value={formData.salary}
                     onChange={handleChange}
                     onBlur={handleBlur}
                     placeholder="50000"
-                    step="0.01"
                     disabled={loading}
                     className={`${fieldCls("salary")} pr-8`}
                   />
@@ -609,59 +796,11 @@ const AddEmployeeForm = ({ onSubmit, onCancel }) => {
                     </span>
                   )}
                 </div>
-              </div>
-            </div>
-          </div>
-        );
-
-      case 4:
-        return (
-          <div>
-            <h3 className="text-base font-bold text-gray-800 mb-4">
-              Additional Information
-            </h3>
-            <div className="grid grid-cols-1 gap-3">
-              {/* Manager ID */}
-              <div>
-                <label className={labelCls}>Manager ID</label>
-                <div className="relative">
-                  <input
-                    type="number"
-                    name="manager_id"
-                    value={formData.manager_id}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    placeholder="Manager's employee ID (optional)"
-                    disabled={loading}
-                    className={`${fieldCls("manager_id")} pr-8`}
-                  />
-                  {touched.manager_id && (
-                    <span className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none">
-                      <ValidationIcon valid={isValid("manager_id")} />
-                    </span>
-                  )}
-                </div>
-              </div>
-              {/* Notes */}
-              <div>
-                <label className={labelCls}>Notes</label>
-                <div className="relative">
-                  <textarea
-                    name="notes"
-                    value={formData.notes}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    placeholder="Any additional information about this employee…"
-                    disabled={loading}
-                    rows="3"
-                    className={`${fieldCls("notes")} pr-8 resize-none`}
-                  />
-                  {touched.notes && (
-                    <span className="absolute right-2.5 top-3 pointer-events-none">
-                      <ValidationIcon valid={isValid("notes")} />
-                    </span>
-                  )}
-                </div>
+                {touched.salary && !isValid("salary") && (
+                  <p className="text-xs text-red-500 mt-1">
+                    Salary must be a positive number (e.g. 50000 or 50000.50)
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -696,7 +835,6 @@ const AddEmployeeForm = ({ onSubmit, onCancel }) => {
               ? `₨ ${parseFloat(formData.salary).toLocaleString("en-IN")}`
               : "—",
           ],
-          ["Notes", formData.notes || "—"],
         ].map(([label, val]) => (
           <div key={label}>
             <p className="text-xs font-medium text-gray-400 mb-0.5">{label}</p>
@@ -722,7 +860,7 @@ const AddEmployeeForm = ({ onSubmit, onCancel }) => {
               Add New Employee
             </h2>
             <p className="text-sm text-gray-400 mt-0.5">
-              Step {currentStep} of 4 — {STEPS[currentStep - 1]}
+              Step {currentStep} of 3 — {STEPS[currentStep - 1]}
             </p>
           </div>
           {onCancel && (
@@ -765,7 +903,7 @@ const AddEmployeeForm = ({ onSubmit, onCancel }) => {
 
         {/* Step content */}
         <form onSubmit={handleSubmit} className="space-y-4">
-          {currentStep <= 4 ? renderStep() : renderSummary()}
+          {currentStep <= 3 ? renderStep() : renderSummary()}
 
           {/* Navigation */}
           <div className="flex gap-3 pt-1">
@@ -789,20 +927,20 @@ const AddEmployeeForm = ({ onSubmit, onCancel }) => {
                 Back
               </button>
             )}
-            {currentStep < 4 ? (
+            {currentStep < 3 ? (
               <button
                 type="button"
                 onClick={handleNext}
-                disabled={loading}
-                className="flex-1 py-3 text-sm font-semibold rounded-xl bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200 disabled:opacity-50"
+                disabled={loading || !isStepValid(currentStep)}
+                className="flex-1 py-3 text-sm font-semibold rounded-xl bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 Continue
               </button>
             ) : (
               <button
                 type="submit"
-                disabled={loading}
-                className="flex-1 py-3 text-sm font-semibold rounded-xl bg-green-600 hover:bg-green-700 text-white transition-all duration-200 disabled:opacity-50"
+                disabled={loading || !isStepValid(currentStep)}
+                className="flex-1 py-3 text-sm font-semibold rounded-xl bg-green-600 hover:bg-green-700 text-white transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {loading ? "Creating Employee…" : "Create Employee"}
               </button>

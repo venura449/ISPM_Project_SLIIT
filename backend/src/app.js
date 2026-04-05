@@ -1,4 +1,4 @@
-const express = require('express');
+﻿const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 
@@ -16,7 +16,7 @@ const app = express();
 
 // Middleware
 // Comma-separated allowed origins. Set ALLOWED_ORIGINS env var on Render.
-const allowedOrigins = ("http://localhost:5173,https://itpm-project-sliit.vercel.app").split(",").map(origin => origin.trim());
+const allowedOrigins = ("http://localhost:5173,https://ISPM-project-sliit.vercel.app").split(",").map(origin => origin.trim());
 
 const corsOptions = {
   origin: (origin, callback) => {
@@ -41,7 +41,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.get('/', (req, res) => {
-  res.json({ message: 'Welcome to ITPM Backend API' });
+  res.json({ message: 'Welcome to ISPM Backend API' });
 });
 
 // Health check endpoint

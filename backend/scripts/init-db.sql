@@ -1,6 +1,6 @@
--- Create database if it doesn't exist
-CREATE DATABASE IF NOT EXISTS itpm_db;
-USE itpm_db;
+﻿-- Create database if it doesn't exist
+CREATE DATABASE IF NOT EXISTS ISPM_db;
+USE ISPM_db;
 
 -- Create users table with authentication fields
 CREATE TABLE IF NOT EXISTS users (

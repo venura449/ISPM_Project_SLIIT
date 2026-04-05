@@ -1,10 +1,10 @@
--- ============================================================
+﻿-- ============================================================
 -- Seed February 2026 attendance records for all active employees
 -- Working days: Mon–Fri only (20 working days)
 -- Feb: 2-6, 9-13, 16-20, 23-27
--- Run with: mysql -u root -p itpm_db < seed-attendance-feb2026.sql
+-- Run with: mysql -u root -p ISPM_db < seed-attendance-feb2026.sql
 -- ============================================================
-USE itpm_db;
+USE ISPM_db;
 
 INSERT IGNORE INTO attendance (employee_id, attendance_date, status, marked_at)
 SELECT e.id, d.attendance_date, 'Present', NOW()
