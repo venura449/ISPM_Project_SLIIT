@@ -1,5 +1,7 @@
 ﻿import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 // â”€â”€ helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const fmt = (d) =>
@@ -219,14 +221,34 @@ const NewRequestModal = ({ onSubmit, onCancel, loading }) => {
         <div className="grid grid-cols-2 gap-4">
           <FIELD label="Start Date">
             <div className="flex items-center gap-2">
-              <input
-                type="date"
-                name="start_date"
-                value={form.start_date}
-                min={getTomorrowDate()}
-                onChange={handleChange}
-                onBlur={() => touch("start_date")}
+              <DatePicker
+                selected={form.start_date ? new Date(form.start_date) : null}
+                onChange={(date) => {
+                  const val = date ? date.toISOString().split("T")[0] : "";
+                  setForm((p) => ({
+                    ...p,
+                    start_date: val,
+                    end_date:
+                      p.end_date && date && new Date(p.end_date) <= date
+                        ? ""
+                        : p.end_date,
+                  }));
+                  setTouched((p) => ({ ...p, start_date: true }));
+                }}
+                onCalendarClose={() => touch("start_date")}
+                minDate={(() => {
+                  const d = new Date();
+                  d.setDate(d.getDate() + 1);
+                  d.setHours(0, 0, 0, 0);
+                  return d;
+                })()}
+                dateFormat="yyyy-MM-dd"
+                placeholderText="Select start date"
                 className={`${getInputCls(touched.start_date, isValidField("start_date"))} flex-1`}
+                wrapperClassName="flex-1"
+                calendarClassName="shadow-xl rounded-xl border border-gray-200"
+                showPopperArrow={false}
+                autoComplete="off"
               />
               {touched.start_date && (
                 <ValidationIcon valid={isValidField("start_date")} />
@@ -235,14 +257,35 @@ const NewRequestModal = ({ onSubmit, onCancel, loading }) => {
           </FIELD>
           <FIELD label="End Date">
             <div className="flex items-center gap-2">
-              <input
-                type="date"
-                name="end_date"
-                value={form.end_date}
-                min={form.start_date || getTomorrowDate()}
-                onChange={handleChange}
-                onBlur={() => touch("end_date")}
+              <DatePicker
+                selected={form.end_date ? new Date(form.end_date) : null}
+                onChange={(date) => {
+                  const val = date ? date.toISOString().split("T")[0] : "";
+                  setForm((p) => ({ ...p, end_date: val }));
+                  setTouched((p) => ({ ...p, end_date: true }));
+                }}
+                onCalendarClose={() => touch("end_date")}
+                minDate={
+                  form.start_date
+                    ? (() => {
+                        const d = new Date(form.start_date);
+                        d.setDate(d.getDate() + 1);
+                        return d;
+                      })()
+                    : (() => {
+                        const d = new Date();
+                        d.setDate(d.getDate() + 1);
+                        d.setHours(0, 0, 0, 0);
+                        return d;
+                      })()
+                }
+                dateFormat="yyyy-MM-dd"
+                placeholderText="Select end date"
                 className={`${getInputCls(touched.end_date, isValidField("end_date"))} flex-1`}
+                wrapperClassName="flex-1"
+                calendarClassName="shadow-xl rounded-xl border border-gray-200"
+                showPopperArrow={false}
+                autoComplete="off"
               />
               {touched.end_date && (
                 <ValidationIcon valid={isValidField("end_date")} />

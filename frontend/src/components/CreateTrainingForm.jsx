@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const inputCls =
   "w-full border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-700 bg-white outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-50 transition-all placeholder-gray-400 disabled:opacity-50 disabled:bg-gray-50";
@@ -43,6 +45,9 @@ const CreateTrainingForm = ({ onSubmit, onCancel }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    if (name === "budget") {
+      if (value !== "" && !/^\d*\.?\d*$/.test(value)) return;
+    }
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (name === "trainer_name") {
       if (value) {
@@ -88,14 +93,34 @@ const CreateTrainingForm = ({ onSubmit, onCancel }) => {
           toast.warning("Valid duration is required");
           return false;
         }
+        if (formData.budget !== "") {
+          if (!/^\d+(\.\d+)?$/.test(formData.budget)) {
+            toast.warning("Budget must contain numbers only");
+            return false;
+          }
+          if (parseFloat(formData.budget) < 0) {
+            toast.warning("Budget cannot be a negative value");
+            return false;
+          }
+        }
         return true;
-      case 3:
+      case 3: {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
         if (!formData.start_date) {
           toast.warning("Start date is required");
           return false;
         }
+        if (new Date(formData.start_date) < today) {
+          toast.warning("Start date cannot be in the past");
+          return false;
+        }
         if (!formData.end_date) {
           toast.warning("End date is required");
+          return false;
+        }
+        if (new Date(formData.end_date) < today) {
+          toast.warning("End date cannot be in the past");
           return false;
         }
         if (new Date(formData.start_date) >= new Date(formData.end_date)) {
@@ -103,6 +128,7 @@ const CreateTrainingForm = ({ onSubmit, onCancel }) => {
           return false;
         }
         return true;
+      }
       default:
         return true;
     }
@@ -233,13 +259,11 @@ const CreateTrainingForm = ({ onSubmit, onCancel }) => {
               <div>
                 <label className={labelCls}>Budget (optional)</label>
                 <input
-                  type="number"
+                  type="text"
                   name="budget"
                   value={formData.budget}
                   onChange={handleChange}
                   placeholder="500000"
-                  step="0.01"
-                  min="0"
                   disabled={loading}
                   className={inputCls}
                 />
@@ -286,26 +310,61 @@ const CreateTrainingForm = ({ onSubmit, onCancel }) => {
                 <label className={labelCls}>
                   Start Date <span className="text-red-400">*</span>
                 </label>
-                <input
-                  type="date"
-                  name="start_date"
-                  value={formData.start_date}
-                  onChange={handleChange}
+                <DatePicker
+                  selected={
+                    formData.start_date ? new Date(formData.start_date) : null
+                  }
+                  onChange={(date) => {
+                    const val = date ? date.toISOString().split("T")[0] : "";
+                    setFormData((prev) => ({
+                      ...prev,
+                      start_date: val,
+                      end_date:
+                        prev.end_date && date && new Date(prev.end_date) <= date
+                          ? ""
+                          : prev.end_date,
+                    }));
+                  }}
+                  minDate={new Date()}
+                  dateFormat="yyyy-MM-dd"
+                  placeholderText="Select start date"
                   disabled={loading}
                   className={inputCls}
+                  wrapperClassName="w-full"
+                  calendarClassName="shadow-xl rounded-xl border border-gray-200"
+                  showPopperArrow={false}
+                  autoComplete="off"
                 />
               </div>
               <div>
                 <label className={labelCls}>
                   End Date <span className="text-red-400">*</span>
                 </label>
-                <input
-                  type="date"
-                  name="end_date"
-                  value={formData.end_date}
-                  onChange={handleChange}
+                <DatePicker
+                  selected={
+                    formData.end_date ? new Date(formData.end_date) : null
+                  }
+                  onChange={(date) => {
+                    const val = date ? date.toISOString().split("T")[0] : "";
+                    setFormData((prev) => ({ ...prev, end_date: val }));
+                  }}
+                  minDate={
+                    formData.start_date
+                      ? (() => {
+                          const d = new Date(formData.start_date);
+                          d.setDate(d.getDate() + 1);
+                          return d;
+                        })()
+                      : new Date()
+                  }
+                  dateFormat="yyyy-MM-dd"
+                  placeholderText="Select end date"
                   disabled={loading}
                   className={inputCls}
+                  wrapperClassName="w-full"
+                  calendarClassName="shadow-xl rounded-xl border border-gray-200"
+                  showPopperArrow={false}
+                  autoComplete="off"
                 />
               </div>
               <div className="col-span-2">
