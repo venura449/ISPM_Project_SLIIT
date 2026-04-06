@@ -235,6 +235,7 @@ const NewRequestModal = ({ onSubmit, onCancel, loading }) => {
                   }));
                   setTouched((p) => ({ ...p, start_date: true }));
                 }}
+                onChangeRaw={(e) => e.preventDefault()}
                 onCalendarClose={() => touch("start_date")}
                 minDate={(() => {
                   const d = new Date();
@@ -264,6 +265,7 @@ const NewRequestModal = ({ onSubmit, onCancel, loading }) => {
                   setForm((p) => ({ ...p, end_date: val }));
                   setTouched((p) => ({ ...p, end_date: true }));
                 }}
+                onChangeRaw={(e) => e.preventDefault()}
                 onCalendarClose={() => touch("end_date")}
                 minDate={
                   form.start_date

@@ -325,6 +325,7 @@ const CreateTrainingForm = ({ onSubmit, onCancel }) => {
                           : prev.end_date,
                     }));
                   }}
+                  onChangeRaw={(e) => e.preventDefault()}
                   minDate={new Date()}
                   dateFormat="yyyy-MM-dd"
                   placeholderText="Select start date"
@@ -348,6 +349,7 @@ const CreateTrainingForm = ({ onSubmit, onCancel }) => {
                     const val = date ? date.toISOString().split("T")[0] : "";
                     setFormData((prev) => ({ ...prev, end_date: val }));
                   }}
+                  onChangeRaw={(e) => e.preventDefault()}
                   minDate={
                     formData.start_date
                       ? (() => {
