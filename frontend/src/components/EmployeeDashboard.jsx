@@ -42,6 +42,9 @@ const inputCls =
 const textInputCls =
   "w-full py-3 text-sm text-gray-700 bg-transparent outline-none placeholder-gray-400 disabled:opacity-50";
 
+const dateInputCls =
+  "min-w-0 flex-1 py-3 text-sm text-gray-700 bg-white outline-none disabled:opacity-50 [color-scheme:light]";
+
 const ValidationIcon = ({ valid }) =>
   valid ? (
     <svg
@@ -137,7 +140,7 @@ const EmployeeDashboard = () => {
 
   const validateProfileField = (name, val) => {
     if (name === "phone")
-      return val.trim() === "" || /^[+]?[\d\s\-(). ]{7,15}$/.test(val.trim());
+      return val.trim() === "" || /^\d{10}$/.test(val.trim());
     if (name === "address") return val.trim() === "" || val.trim().length >= 5;
     return true;
   };
@@ -232,7 +235,7 @@ const EmployeeDashboard = () => {
       if (data.success) {
         setEmployee(data.user);
         setEditMode(false);
-        toast.success("Profile updated successfully! âœ“", {
+        toast.success("Profile updated successfully! ", {
           position: "top-right",
           autoClose: 2000,
         });
@@ -302,7 +305,7 @@ const EmployeeDashboard = () => {
           newPassword: "",
           confirmPassword: "",
         });
-        toast.success("Password changed successfully! âœ“", {
+        toast.success("Password changed successfully! ", {
           position: "top-right",
           autoClose: 2000,
         });
@@ -369,7 +372,7 @@ const EmployeeDashboard = () => {
       );
       const data = await response.json();
       if (data.success) {
-        toast.success("Leave request submitted! âœ“", {
+        toast.success("Leave request submitted! ", {
           position: "top-right",
           autoClose: 2500,
         });
@@ -409,7 +412,7 @@ const EmployeeDashboard = () => {
       );
       const data = await response.json();
       if (data.success) {
-        toast.success("Leave request deleted âœ“", {
+        toast.success("Leave request deleted ", {
           position: "top-right",
           autoClose: 2500,
         });
@@ -597,7 +600,7 @@ const EmployeeDashboard = () => {
           <div>
             <h1 className="text-base font-bold text-gray-800">{pageLabel}</h1>
             <p className="text-xs text-gray-400">
-              {greeting}, {employee?.name?.split(" ")[0] || "there"} ðŸ‘‹
+              {greeting}, {employee?.name?.split(" ")[0] || "there"} 👋
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -614,7 +617,7 @@ const EmployeeDashboard = () => {
                   {employee?.name}
                 </p>
                 <p className="text-[10px] text-gray-400 leading-tight">
-                  {employee?.designation} Â· {employee?.department}
+                  {employee?.designation} · {employee?.department}
                 </p>
               </div>
             </div>
@@ -895,7 +898,7 @@ const EmployeeDashboard = () => {
                                       },
                                     )}
                                     {req.days_applied
-                                      ? ` · ${req.days_applied} day${req.days_applied !== 1 ? "s" : ""}`
+                                      ? ` ${Math.round(Number(req.days_applied))} day${Number(req.days_applied) !== 1 ? "s" : ""}`
                                       : ""}
                                   </span>
                                 </div>
@@ -988,8 +991,8 @@ const EmployeeDashboard = () => {
                     {[
                       ["Full Name", employee?.name],
                       ["Email", employee?.email],
-                      ["Phone", employee?.phone || "â€”"],
-                      ["Address", employee?.address || "â€”"],
+                      ["Phone", employee?.phone || "–"],
+                      ["Address", employee?.address || "–"],
                     ].map(([label, val]) => (
                       <div key={label} className="flex flex-col">
                         <span className="text-xs text-gray-400 uppercase tracking-wider mb-0.5">
@@ -1117,13 +1120,23 @@ const EmployeeDashboard = () => {
                         value={leaveForm.start_date}
                         min={getTomorrowDate()}
                         onChange={(e) => {
+                          const newStart = e.target.value;
                           setLeaveForm((p) => ({
                             ...p,
-                            start_date: e.target.value,
+                            start_date: newStart,
+                            // clear end_date if it's now before the new start
+                            end_date:
+                              p.end_date && p.end_date < newStart
+                                ? ""
+                                : p.end_date,
                           }));
                           setLeaveTouched((p) => ({
                             ...p,
                             start_date: true,
+                            ...(leaveForm.end_date &&
+                            leaveForm.end_date < e.target.value
+                              ? { end_date: false }
+                              : {}),
                           }));
                         }}
                         onBlur={() =>
@@ -1132,9 +1145,20 @@ const EmployeeDashboard = () => {
                             start_date: true,
                           }))
                         }
-                        className={textInputCls}
+                        className={dateInputCls}
                       />
                     </div>
+                    {leaveTouched.start_date &&
+                      !validateLeaveField(
+                        "start_date",
+                        leaveForm.start_date,
+                      ) && (
+                        <p className="text-xs text-red-500 mt-1 ml-1">
+                          {!leaveForm.start_date
+                            ? "Start date is required."
+                            : "Start date must be tomorrow or later."}
+                        </p>
+                      )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -1174,9 +1198,20 @@ const EmployeeDashboard = () => {
                             end_date: true,
                           }))
                         }
-                        className={textInputCls}
+                        className={dateInputCls}
                       />
                     </div>
+                    {leaveTouched.end_date &&
+                      !validateLeaveField("end_date", leaveForm.end_date) && (
+                        <p className="text-xs text-red-500 mt-1 ml-1">
+                          {!leaveForm.end_date
+                            ? "End date is required."
+                            : leaveForm.start_date &&
+                                leaveForm.end_date < leaveForm.start_date
+                              ? "End date must be on or after the start date."
+                              : "End date must be tomorrow or later."}
+                        </p>
+                      )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -1291,7 +1326,7 @@ const EmployeeDashboard = () => {
                                 year: "numeric",
                               },
                             )}{" "}
-                            â€”{" "}
+                            –{" "}
                             {new Date(req.end_date).toLocaleDateString(
                               "en-US",
                               {
@@ -1318,8 +1353,8 @@ const EmployeeDashboard = () => {
                       <p className="text-sm text-gray-600 mb-3">{req.reason}</p>
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-gray-400">
-                          {req.days_applied} day
-                          {req.days_applied !== 1 ? "s" : ""}
+                          {Math.round(Number(req.days_applied))} day
+                          {Number(req.days_applied) !== 1 ? "s" : ""}
                         </span>
                         {req.status === "Pending" && (
                           <button
@@ -1368,39 +1403,54 @@ const EmployeeDashboard = () => {
                       Phone Number
                     </label>
                     {editMode ? (
-                      <div
-                        className={getFieldCls(
-                          profileTouched.phone,
-                          validateProfileField("phone", formData.phone),
-                        )}
-                      >
-                        <Icon
-                          d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-                          className="w-4 h-4 text-gray-400 shrink-0"
-                        />
-                        <input
-                          type="tel"
-                          name="phone"
-                          value={formData.phone}
-                          onChange={(e) => {
-                            handleInputChange(e);
-                            setProfileTouched((p) => ({ ...p, phone: true }));
-                          }}
-                          onBlur={() =>
-                            setProfileTouched((p) => ({ ...p, phone: true }))
-                          }
-                          placeholder="+94 77 123 4567"
-                          className={textInputCls}
-                        />
-                        {profileTouched.phone && (
-                          <ValidationIcon
-                            valid={validateProfileField(
-                              "phone",
-                              formData.phone,
-                            )}
+                      <>
+                        <div
+                          className={getFieldCls(
+                            profileTouched.phone,
+                            validateProfileField("phone", formData.phone),
+                          )}
+                        >
+                          <Icon
+                            d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                            className="w-4 h-4 text-gray-400 shrink-0"
                           />
-                        )}
-                      </div>
+                          <input
+                            type="tel"
+                            name="phone"
+                            value={formData.phone}
+                            maxLength={10}
+                            onChange={(e) => {
+                              // Allow digits only
+                              const digits = e.target.value.replace(/\D/g, "");
+                              e.target.value = digits;
+                              handleInputChange({
+                                target: { name: "phone", value: digits },
+                              });
+                              setProfileTouched((p) => ({ ...p, phone: true }));
+                            }}
+                            onBlur={() =>
+                              setProfileTouched((p) => ({ ...p, phone: true }))
+                            }
+                            placeholder="0771234567"
+                            className={textInputCls}
+                          />
+                          {profileTouched.phone && (
+                            <ValidationIcon
+                              valid={validateProfileField(
+                                "phone",
+                                formData.phone,
+                              )}
+                            />
+                          )}
+                        </div>
+                        {profileTouched.phone &&
+                          formData.phone.trim() !== "" &&
+                          !validateProfileField("phone", formData.phone) && (
+                            <p className="text-xs text-red-500 mt-1 ml-1">
+                              Phone number must be exactly 10 digits.
+                            </p>
+                          )}
+                      </>
                     ) : (
                       <p className="text-sm text-gray-700">
                         {employee?.phone || (

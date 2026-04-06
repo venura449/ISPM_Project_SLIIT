@@ -9,7 +9,7 @@ const fmt = (d) =>
         day: "numeric",
         year: "numeric",
       })
-    : "â€”";
+    : "-";
 
 const STATUS_CFG = {
   Pending: {
@@ -301,7 +301,7 @@ const NewRequestModal = ({ onSubmit, onCancel, loading }) => {
             disabled={loading}
             className="flex-1 py-2.5 text-sm font-semibold rounded-xl bg-blue-600 hover:bg-blue-700 text-white transition-all shadow-sm disabled:opacity-50"
           >
-            {loading ? "Submittingâ€¦" : "Submit Request"}
+            {loading ? "Submitting..." : "Submit Request"}
           </button>
         </div>
       </form>
@@ -755,11 +755,13 @@ const LeaveManagement = () => {
                             {req.leave_type} Leave
                           </p>
                           <p className="text-xs text-gray-400">
-                            {fmt(req.start_date)} â€“ {fmt(req.end_date)}
+                            {fmt(req.start_date)} – {fmt(req.end_date)}
                             {req.days_applied && (
                               <span className="ml-2 font-semibold text-gray-600">
-                                Â· {req.days_applied}{" "}
-                                {req.days_applied === 1 ? "day" : "days"}
+                                {Math.round(Number(req.days_applied))}{" "}
+                                {Number(req.days_applied) === 1
+                                  ? "day"
+                                  : "days"}
                               </span>
                             )}
                           </p>
@@ -842,7 +844,7 @@ const LeaveManagement = () => {
                       <div className="flex flex-col items-center gap-3">
                         <div className="w-7 h-7 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
                         <p className="text-sm text-gray-400">
-                          Loading pending requestsâ€¦
+                          Loading pending requests...
                         </p>
                       </div>
                     </td>
@@ -896,7 +898,7 @@ const LeaveManagement = () => {
                       </td>
                       <td className="px-5 py-4 hidden md:table-cell">
                         <span className="text-sm text-gray-600">
-                          {req.department || "â€”"}
+                          {req.department || "-"}
                         </span>
                       </td>
                       <td className="px-5 py-4">
@@ -922,7 +924,7 @@ const LeaveManagement = () => {
                       </td>
                       <td className="px-5 py-4 hidden lg:table-cell max-w-xs">
                         <p className="text-sm text-gray-600 line-clamp-2">
-                          {req.reason || "â€”"}
+                          {req.reason || "-"}
                         </p>
                       </td>
                       <td className="px-5 py-4">
